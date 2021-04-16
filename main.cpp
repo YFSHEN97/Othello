@@ -30,14 +30,14 @@ int main(int argc, char **argv) {
         black = new HumanAgent(BLACK);
         white = new MCTSComputerAgent(WHITE, 1000000, true);
     } else if (!strcmp(argv[1], "-h1")) {
-        black = new MCTSComputerAgent(BLACK, 1000000, true);
+        black = new MCTSComputerAgent(BLACK, 5000000, true);
         white = new HumanAgent(WHITE);
     } else if (!strcmp(argv[1], "-h")) {
         black = new HumanAgent(BLACK);
         white = new HumanAgent(WHITE);
     } else if (!strcmp(argv[1], "-m")) {
-        black = new MCTSComputerAgent(BLACK, 50000, true);
-        white = new MCTSComputerAgent(WHITE, 50000, false);
+        black = new MCTSComputerAgent(BLACK, 200000, true);
+        white = new MCTSComputerAgent(WHITE, 200000, false);
     } else {
         printf("usage: main -h0 | -h1 | -h | -m\n");
         exit(1);
@@ -47,12 +47,25 @@ int main(int argc, char **argv) {
     position.pretty();
     cout << endl;
     while (!position.game_over()) {
+        // let the player about to move compute their best move
         int move;
-        if (position.whose_turn() == BLACK) move = black->recommend_move(position);
+        Color side = (Color)position.whose_turn();
+        if (side == BLACK) move = black->recommend_move(position);
         else move = white->recommend_move(position);
-        position.make_move(move, (Color)position.whose_turn());
+        // commit that move
+        position.make_move(move, side);
+        // post-processing for the agents
         black->acknowledge_move(move);
         white->acknowledge_move(move);
+        // output the move to the command line
+        string s = (side == BLACK) ? "\033[31mBlack\033[0m" : "White";
+        if (move < 0) {
+            cout << s << " passed" << endl << endl;
+        } else {
+            position.pretty();
+            int i = move >> 3, j = move & 7;
+            cout << s << " played " << (char)('a' + j) << (i + 1) << endl << endl;
+        }
     }
 
     // display the game outcome

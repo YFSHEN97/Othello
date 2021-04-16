@@ -13,15 +13,15 @@ public:
     Agent(Color c);
     // dummy destructor for cleanup purposes
     virtual ~Agent() {};
-    // after a move has been made, acknowledge it as necessary (perform some internal action)
+    // optional function: do some post-processing work internally if necessary
     virtual void acknowledge_move(int move) {};
-    // recommend a move using the policy on the given position and print the move
+    // recommend a move using the policy on the given position
     int recommend_move(Position& pos);
 
 protected:
     // one of two values, BLACK or WHITE
     Color side;
-    // given the current game configuration, output the "optimal" move
+    // returns optimal move given a position; this function MUST be redefined
     virtual int policy(Position& pos) { return 0; };
 };
 
