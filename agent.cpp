@@ -13,26 +13,26 @@ MERSENNE_TWISTER twister(time(NULL));
 Agent::Agent(Color c) : side(c) {}
 
 
-// make a move using the policy on the given position and print the move
-void Agent::make_move(Position& pos)
+// recommend a move using the policy on the given position and print the move
+int Agent::recommend_move(Position& pos)
 {
     // compute the move according to policy
     time_t t1 = time(NULL);
     int move = policy(pos);
     time_t t2 = time(NULL);
+    // output the move to the command line (does not actually modify current position)
     string s = (side == BLACK) ? "\033[31mBlack\033[0m" : "White";
     if (move < 0) {
-        pos.pass(side);
         cout << s << " passed" << endl << endl;
-        return;
+        return move;
     }
-    // output the move to the command line
-    pos.make_move(move, side);
-    pos.pretty();
+    Position pos_copy(pos);
+    pos_copy.make_move(move, side);
+    pos_copy.pretty();
     int i = move >> 3, j = move & 7;
     cout << s << " played " << (char)('a' + j) << (i + 1) << endl;
     cout << "Time taken: " << (int)(t2 - t1) << "s" << endl << endl;
-    return;
+    return move;
 }
 
 

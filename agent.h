@@ -13,8 +13,10 @@ public:
     Agent(Color c);
     // dummy destructor for cleanup purposes
     virtual ~Agent() {};
-    // make a move using the policy on the given position and print the move
-    void make_move(Position& pos);
+    // after a move has been made, acknowledge it as necessary (perform some internal action)
+    virtual void acknowledge_move(int move) {};
+    // recommend a move using the policy on the given position and print the move
+    int recommend_move(Position& pos);
 
 protected:
     // one of two values, BLACK or WHITE
@@ -50,10 +52,19 @@ struct TreeNode;
 class MCTSComputerAgent : public Agent {
 public:
     // constructor
-    MCTSComputerAgent(Color c, uint32_t iterations);
+    MCTSComputerAgent(Color c, uint32_t iterations, bool bias);
+    // destructor
+    ~MCTSComputerAgent();
+    // after a move has been made, preserve relevant search tree branches
+    void acknowledge_move(int move);
 private:
     // how many rollouts to conduct during MCTS
     uint32_t iterations;
+    // store the search tree from previous MCTS iterations
+    TreeNode *tree;
+    // bias indicates whether the default policy should use bias
+    bool bias;
+    // policy function that returns the best move given a position
     int policy(Position& pos);
     // do one iteration of MCTS and update stats in place
     void MCTS(TreeNode *node, Position& pos);

@@ -58,6 +58,12 @@ inline int popcount(uint64_t i) {
 }
 
 
+// given a 64-bit integer with exactly 1 set bit, return the bit's position
+inline int bit_pos(uint64_t i) {
+  return popcount(i-1);
+}
+
+
 // a function that returns the position of the set bit with given rank (r) in a uint64
 inline unsigned int rth_setbit_position(uint64_t v, unsigned int r) {
   unsigned int s;      // Output: Resulting position of bit with rank r [1-64]

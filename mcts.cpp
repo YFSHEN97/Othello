@@ -1,6 +1,7 @@
 #include <vector>
 #include <cmath>
 #include <limits>
+#include <climits>
 #include <iostream>
 #include "agent.h"
 #include "position.h"
@@ -22,7 +23,7 @@ struct TreeNode {
 };
 
 
-// free all heap memory occupied by the tree nodes
+// free all heap memory occupied by the tree
 static void dumpTree(TreeNode *root)
 {
     for (auto child : root->children)
@@ -32,8 +33,32 @@ static void dumpTree(TreeNode *root)
 
 
 // constructor
-MCTSComputerAgent::MCTSComputerAgent(Color c, uint32_t iterations) : Agent(c),
-    iterations(iterations) {}
+MCTSComputerAgent::MCTSComputerAgent(Color c, uint32_t iterations, bool bias) :
+    Agent(c), iterations(iterations), bias(bias)
+{
+    tree = NULL;
+}
+
+
+// destructor
+MCTSComputerAgent::~MCTSComputerAgent()
+{
+    if (tree != NULL) dumpTree(tree);
+}
+
+
+// acknowledge a move by preserving its branch and deleting all the others
+void MCTSComputerAgent::acknowledge_move(int move)
+{
+    if (tree == NULL) return;
+    TreeNode *newtree = NULL;
+    for (auto child : tree->children) {
+        if (child->move == move) newtree = child;
+        else dumpTree(child);
+    }
+    delete tree;
+    tree = newtree;
+}
 
 
 // outputs the optimal move after performing MCTS
@@ -41,48 +66,31 @@ int MCTSComputerAgent::policy(Position& pos)
 {
     Bitboard moves_bb = pos.generate_moves(side);
     if (!moves_bb) return -1;
-    // initialize the root node
-    TreeNode *root = new TreeNode();
-    root->children = vector<TreeNode*>();
-    root->move     = 0;
-    root->rewards  = 0;
-    root->base     = 0;
-    root->chosen   = 0;
+    // set up the root node
+    if (tree == NULL) {
+        tree           = new TreeNode();
+        tree->children = vector<TreeNode*>();
+        tree->move     = 0;
+        tree->rewards  = 0;
+        tree->base     = 0;
+        tree->chosen   = 0;
+    }
     // perform search for targeted number of iterations
     for (uint32_t i = 0; i < iterations; i++) {
         Position pos_copy(pos); // make a write-able copy
-        MCTS(root, pos_copy);
+        MCTS(tree, pos_copy);
     }
-    // using the search result to select a move
-    if (pos.whose_turn() == BLACK) {
-        float max = std::numeric_limits<float>::lowest();
-        float avg;
-        TreeNode *argmax;
-        for (auto child : root->children) {
-            avg = (float)child->rewards / child->chosen;
-            if (avg > max) {
-                max = avg;
-                argmax = child;
-            }
+    // pick the child that has been explored the most
+    int max = 0;
+    TreeNode *argmax;
+    for (auto child : tree->children) {
+        if (child->chosen > max) {
+            max = child->chosen;
+            argmax = child;
         }
-        int best = argmax->move;
-        dumpTree(root);
-        return best;
-    } else {
-        float min = std::numeric_limits<float>::max();
-        float avg;
-        TreeNode *argmin;
-        for (auto child : root->children) {
-            avg = (float)child->rewards / child->chosen;
-            if (avg < min) {
-                min = avg;
-                argmin = child;
-            }
-        }
-        int best = argmin->move;
-        dumpTree(root);
-        return best;
     }
+    int best = argmax->move;
+    return best;
 }
 
 
@@ -100,21 +108,34 @@ void MCTSComputerAgent::MCTS(TreeNode *node, Position& pos)
         }
         // if non-terminal, expand by adding all possible children
         Bitboard moves_bb = pos.generate_moves((Color)pos.whose_turn());
-        vector<int> moves_vec = pos.bb2vec(moves_bb);
-        if (moves_vec.size() == 0) moves_vec.push_back(-1); // no legal moves, has to pass
-        for (auto m : moves_vec) {
+        // no legal moves, has to pass
+        if (moves_bb == 0) {
             TreeNode *new_node = new TreeNode();
             new_node->children = vector<TreeNode*>();
-            new_node->move     = m;
+            new_node->move     = -1;
             new_node->rewards  = 0;
             new_node->base     = 1;
             new_node->chosen   = 0;
             node->children.push_back(new_node);
         }
+        // have 1 or more legal moves, list them as new children nodes
+        else {
+            while (moves_bb != 0) {
+                Bitboard move = moves_bb & (~moves_bb + 1);
+                moves_bb &= (~move);
+                TreeNode *new_node = new TreeNode();
+                new_node->children = vector<TreeNode*>();
+                new_node->move     = bit_pos(move);
+                new_node->rewards  = 0;
+                new_node->base     = 1;
+                new_node->chosen   = 0;
+                node->children.push_back(new_node);
+            }
+        }
         // randomly choose ONLY ONE child to rollout
         // update the statistics in the process
-        int i = twister_2.randInt(moves_vec.size() - 1);
-        pos.make_move(moves_vec[i], (Color)pos.whose_turn());
+        int i = twister_2.randInt(node->children.size() - 1);
+        pos.make_move(node->children[i]->move, (Color)pos.whose_turn());
         int outcome = rollout(pos);
         node->children[i]->rewards += outcome;
         node->children[i]->chosen += 1;
@@ -178,7 +199,11 @@ void MCTSComputerAgent::MCTS(TreeNode *node, Position& pos)
 }
 
 
-// do a rollout according to a particular default policy, and return game outcome
+// do a rollout according to default policy, and return game outcome
+// DEFAULT POLICY:
+// if corner moves are available, then make one of the corner moves
+// otherwise if there are moves other than b2, b7, g2, g7 available, choose one of those
+// otherwise choose one of b2, b7, g2, g7
 int MCTSComputerAgent::rollout(Position& pos)
 {
     while (!pos.game_over()) {
@@ -187,9 +212,18 @@ int MCTSComputerAgent::rollout(Position& pos)
             pos.pass((Color)pos.whose_turn());
             continue;
         }
+        Bitboard pool = moves_bb;
+        if (bias) {
+            // first prioritize corner squares
+            pool &= 0x8100000000000081;
+            if (pool == 0) pool = moves_bb;
+            // next eliminate b2, b7, g2, g7, if possible
+            pool &= 0xffbdffffffffbdff;
+            if (pool == 0) pool = moves_bb;
+        }
         // for performance reasons, we don't use Position.bb2vec to pick a random move
-        int r = 1 + twister_2.randInt(popcount(moves_bb) - 1);
-        int m = 64 - rth_setbit_position(moves_bb, r);
+        int r = 1 + twister_2.randInt(popcount(pool) - 1);
+        int m = 64 - rth_setbit_position(pool, r);
         pos.make_move(m, (Color)pos.whose_turn());
     }
     return pos.outcome();
