@@ -23,10 +23,14 @@ public:
     int whose_turn(void);
     // determine if the game is over
     bool game_over(void);
-    // determine who won the game (or if it is a draw) GIVEN that game is over
+    // determine who won the game (or if it is a draw); UNDEFINED behavior if game not over
     int outcome(void);
     // pass a turn for the given player (only called when player has no legal moves)
     void pass(Color c);
+    // accessor for black pieces
+    Bitboard get_blackBB(void);
+    // accessor for white pieces
+    Bitboard get_whiteBB(void);
 
 private:
     // 8 bitboards, 4 for each color: upright, clockwise 90, clockwise 45, counterclockwise 45

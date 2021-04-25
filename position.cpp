@@ -297,3 +297,9 @@ void Position::pass(Color c)
     sideToMove ^= 1;
     passed[c] = true;
 }
+
+// accessors
+Bitboard Position::get_blackBB(void) { return uprightBB[BLACK]; }
+Bitboard Position::get_whiteBB(void) { return uprightBB[WHITE]; }
+
+
