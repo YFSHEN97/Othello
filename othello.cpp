@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <string.h>
+#include <chrono>
 #include "bitboard.h"
 #include "position.h"
 #include "agent.h"
@@ -90,6 +91,7 @@ int main(int argc, char **argv) {
         position.pretty();
         cout << endl;
         while (!position.game_over()) {
+            auto start = chrono::system_clock::now();
             // let the player about to move compute their best move
             int move;
             Color side = (Color)position.whose_turn();
@@ -107,8 +109,12 @@ int main(int argc, char **argv) {
             } else {
                 position.pretty();
                 int i = move >> 3, j = move & 7;
-                cout << s << " played " << (char)('a' + j) << (i + 1) << endl << endl;
+                cout << s << " played " << (char)('a' + j) << (i + 1) << endl;
             }
+            // print time
+            auto finish = std::chrono::system_clock::now();
+            chrono::duration<double> elapsed = finish - start;
+            cout << "Time taken: " << elapsed.count() << " seconds" << endl << endl;
         }
         // display the game outcome
         cout << "************************************************************" << endl;

@@ -159,7 +159,7 @@ int main(void) {
                 position.make_move(move, side);
                 continue;
             }
-            Bitboard moveBB = 1ULL << move;
+            // Bitboard moveBB = 1ULL << move;
             Bitboard blackBB = (side == BLACK) ? position.get_blackBB() : position.get_whiteBB();
             Bitboard whiteBB = (side == BLACK) ? position.get_whiteBB() : position.get_blackBB();
             // create the original un-rotated, un-reflected version
@@ -168,49 +168,49 @@ int main(void) {
             new_datum.white = whiteBB;
             new_datum.move = move;
             data.push_back(new_datum);
-            // rotated clockwise 90
-            SAPair new_datum_cw90;
-            new_datum_cw90.black = rotate90_cw(blackBB);
-            new_datum_cw90.white = rotate90_cw(whiteBB);
-            new_datum_cw90.move = bit_pos(rotate90_cw(moveBB));
-            data.push_back(new_datum_cw90);
-            // rotated 180
-            SAPair new_datum_180;
-            new_datum_180.black = flip_horizontal(flip_vertical(blackBB));
-            new_datum_180.white = flip_horizontal(flip_vertical(whiteBB));
-            new_datum_180.move = bit_pos(flip_horizontal(flip_vertical(moveBB)));
-            data.push_back(new_datum_180);
-            // rotated counter-clockwise 90
-            SAPair new_datum_ccw90;
-            new_datum_ccw90.black = rotate90_ccw(blackBB);
-            new_datum_ccw90.white = rotate90_ccw(whiteBB);
-            new_datum_ccw90.move = bit_pos(rotate90_ccw(moveBB));
-            data.push_back(new_datum_ccw90);
-            // horizontal flip
-            SAPair new_datum_hor;
-            new_datum_hor.black = flip_horizontal(blackBB);
-            new_datum_hor.white = flip_horizontal(whiteBB);
-            new_datum_hor.move = bit_pos(flip_horizontal(moveBB));
-            data.push_back(new_datum_hor);
-            // vertical flip
-            SAPair new_datum_ver;
-            new_datum_ver.black = flip_vertical(blackBB);
-            new_datum_ver.white = flip_vertical(whiteBB);
-            new_datum_ver.move = bit_pos(flip_vertical(moveBB));
-            data.push_back(new_datum_ver);
-            // diagonal flip
-            SAPair new_datum_dgn;
-            new_datum_dgn.black = flip_diag(blackBB);
-            new_datum_dgn.white = flip_diag(whiteBB);
-            new_datum_dgn.move = bit_pos(flip_diag(moveBB));
-            data.push_back(new_datum_dgn);
-            // antidiagonal flip
-            SAPair new_datum_adg;
-            new_datum_adg.black = flip_antidiag(blackBB);
-            new_datum_adg.white = flip_antidiag(whiteBB);
-            new_datum_adg.move = bit_pos(flip_antidiag(moveBB));
-            data.push_back(new_datum_adg);
-            // advance position to prepare for the next set of 8 data points
+            // // rotated clockwise 90
+            // SAPair new_datum_cw90;
+            // new_datum_cw90.black = rotate90_cw(blackBB);
+            // new_datum_cw90.white = rotate90_cw(whiteBB);
+            // new_datum_cw90.move = bit_pos(rotate90_cw(moveBB));
+            // data.push_back(new_datum_cw90);
+            // // rotated 180
+            // SAPair new_datum_180;
+            // new_datum_180.black = flip_horizontal(flip_vertical(blackBB));
+            // new_datum_180.white = flip_horizontal(flip_vertical(whiteBB));
+            // new_datum_180.move = bit_pos(flip_horizontal(flip_vertical(moveBB)));
+            // data.push_back(new_datum_180);
+            // // rotated counter-clockwise 90
+            // SAPair new_datum_ccw90;
+            // new_datum_ccw90.black = rotate90_ccw(blackBB);
+            // new_datum_ccw90.white = rotate90_ccw(whiteBB);
+            // new_datum_ccw90.move = bit_pos(rotate90_ccw(moveBB));
+            // data.push_back(new_datum_ccw90);
+            // // horizontal flip
+            // SAPair new_datum_hor;
+            // new_datum_hor.black = flip_horizontal(blackBB);
+            // new_datum_hor.white = flip_horizontal(whiteBB);
+            // new_datum_hor.move = bit_pos(flip_horizontal(moveBB));
+            // data.push_back(new_datum_hor);
+            // // vertical flip
+            // SAPair new_datum_ver;
+            // new_datum_ver.black = flip_vertical(blackBB);
+            // new_datum_ver.white = flip_vertical(whiteBB);
+            // new_datum_ver.move = bit_pos(flip_vertical(moveBB));
+            // data.push_back(new_datum_ver);
+            // // diagonal flip
+            // SAPair new_datum_dgn;
+            // new_datum_dgn.black = flip_diag(blackBB);
+            // new_datum_dgn.white = flip_diag(whiteBB);
+            // new_datum_dgn.move = bit_pos(flip_diag(moveBB));
+            // data.push_back(new_datum_dgn);
+            // // antidiagonal flip
+            // SAPair new_datum_adg;
+            // new_datum_adg.black = flip_antidiag(blackBB);
+            // new_datum_adg.white = flip_antidiag(whiteBB);
+            // new_datum_adg.move = bit_pos(flip_antidiag(moveBB));
+            // data.push_back(new_datum_adg);
+            // advance position to prepare for the next set of data points
             position.make_move(move, side);
         }
     }

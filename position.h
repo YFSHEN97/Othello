@@ -31,6 +31,8 @@ public:
     Bitboard get_blackBB(void);
     // accessor for white pieces
     Bitboard get_whiteBB(void);
+    // output into a string, row by row, upper-left to lower-right
+    std::string serialize(void);
 
 private:
     // 8 bitboards, 4 for each color: upright, clockwise 90, clockwise 45, counterclockwise 45

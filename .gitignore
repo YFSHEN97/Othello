@@ -1,6 +1,12 @@
+.DS_Store
+
 *.o
-sandbox*
+*.txt
+
 othello
 test
 parser
-*.txt
+mcts_v_edax
+sandbox*
+
+Edax/

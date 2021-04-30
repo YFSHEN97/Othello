@@ -252,6 +252,23 @@ void Position::pretty(void)
 }
 
 
+// serialize the board into a string
+string Position::serialize(void)
+{
+    string result = "";
+    for (int i = 56; i >= 0; i -= 8) {
+        for (int j = i; j < i+8; j++) {
+            if ((uprightBB[BLACK] >> j) & 1) result.append(1, 'b');
+            else if ((uprightBB[WHITE] >> j) & 1) result.append(1, 'w');
+            else result.append(1, '.');
+        }
+    }
+    if (sideToMove == BLACK) result.append(1, 'b');
+    else result.append(1, 'w');
+    return result;
+}
+
+
 // convert a bitboard containing moves to a vector
 vector<int> Position::bb2vec(Bitboard move)
 {
