@@ -10,8 +10,8 @@ using namespace std;
 
 
 int main(int argc, char **argv) {
-    // error check command line format: $ ./main [-h | [-uITER | -bITER | -r]]{2} (-t NUM)*
-    // arguments 1 & 2: -h (human player) or -u (unbiased MCTS) or -b (biased MCTS) or -r (random)
+    // error check command line format: $ ./main [-h | [-uITER | -bITER | -c | -r]]{2} (-t NUM)*
+    // arguments 1 & 2: -h (human player) or -u (unbiased MCTS) or -b (biased MCTS) or -c (CNN) or -r (random)
     // argument 3: optional, only accepted if the two players are both machine
     // for example: ./main -r -b50000 200
     // means let a random black agent and a biased MCTS agent with 50000 iterations play 200 games
@@ -35,10 +35,12 @@ int main(int argc, char **argv) {
     } else if (f1.rfind("-b", 0) == 0) {
         p1 = 'b';
         n1 = stoi(f1.substr(2));
+    } else if (f1.rfind("-c", 0) == 0) {
+        p1 = 'c';
     } else if (f1.rfind("-r", 0) == 0) {
         p1 = 'r';
     } else {
-        printf("usage: ./main [-h | [-uITER | -bITER | -r]]{2} NUM*\n");
+        printf("usage: ./main [-h | [-uITER | -bITER | -c | -r]]{2} NUM*\n");
         exit(1);
     }
     if (f2.rfind("-h", 0) == 0) {
@@ -50,10 +52,12 @@ int main(int argc, char **argv) {
     } else if (f2.rfind("-b", 0) == 0) {
         p2 = 'b';
         n2 = stoi(f2.substr(2));
+    } else if (f2.rfind("-c", 0) == 0) {
+        p2 = 'c';
     } else if (f2.rfind("-r", 0) == 0) {
         p2 = 'r';
     } else {
-        printf("usage: ./main [-h | [-uITER | -bITER | -r]]{2} NUM*\n");
+        printf("usage: ./main [-h | [-uITER | -bITER | -c | -r]]{2} NUM*\n");
         exit(1);
     }
     if (hasHuman && argc == 4) {
@@ -76,6 +80,7 @@ int main(int argc, char **argv) {
             case 'h': black = new HumanAgent(BLACK); break;
             case 'u': black = new MCTSComputerAgent(BLACK, n1, false); break;
             case 'b': black = new MCTSComputerAgent(BLACK, n1, true); break;
+            case 'c': black = new CNNComputerAgent(BLACK); break;
             case 'r': black = new RandomComputerAgent(BLACK); break;
             default: printf("impossible\n"); exit(1);
         }
@@ -83,6 +88,7 @@ int main(int argc, char **argv) {
             case 'h': white = new HumanAgent(WHITE); break;
             case 'u': white = new MCTSComputerAgent(WHITE, n2, false); break;
             case 'b': white = new MCTSComputerAgent(WHITE, n2, true); break;
+            case 'c': white = new CNNComputerAgent(WHITE); break;
             case 'r': white = new RandomComputerAgent(WHITE); break;
             default: printf("impossible\n"); exit(1);
         }
@@ -134,12 +140,14 @@ int main(int argc, char **argv) {
             switch (p1) {
                 case 'u': black = new MCTSComputerAgent(BLACK, n1, false); break;
                 case 'b': black = new MCTSComputerAgent(BLACK, n1, true); break;
+                case 'c': black = new CNNComputerAgent(BLACK); break;
                 case 'r': black = new RandomComputerAgent(BLACK); break;
                 default: printf("impossible\n"); exit(1);
             }
             switch (p2) {
                 case 'u': white = new MCTSComputerAgent(WHITE, n2, false); break;
                 case 'b': white = new MCTSComputerAgent(WHITE, n2, true); break;
+                case 'c': white = new CNNComputerAgent(WHITE); break;
                 case 'r': white = new RandomComputerAgent(WHITE); break;
                 default: printf("impossible\n"); exit(1);
             }

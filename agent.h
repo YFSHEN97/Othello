@@ -73,4 +73,13 @@ private:
 };
 
 
+// a computer AI that uses an externally trained CNN to predict best moves
+class CNNComputerAgent : public Agent {
+public:
+    using Agent::Agent;
+private:
+    int policy(Position& pos);
+};
+
+
 #endif
