@@ -1,12 +1,15 @@
 .DS_Store
+__pycache__
 
 *.o
-*.txt
 
+sandbox*
 othello
 test
 parser
 mcts_v_edax
-sandbox*
 
 Edax/
+move_predictor/data.*
+move_predictor/data_symmetric.*
+
