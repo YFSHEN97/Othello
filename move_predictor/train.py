@@ -83,7 +83,9 @@ def trainModel( model, small=True, batch_size=100, num_epochs=24 ):
     # create callbacks
     def lr_scheduler(epoch, lr):
         decay_rate = 0.95 if small else 0.8
-        return lr * pow(decay_rate, epoch)
+        if epoch == 0:
+            return lr
+        return lr * decay_rate
     scheduler = LearningRateScheduler(lr_scheduler, verbose=1)
     save_path = "best_small.h5" if small else "best_symmetric.h5"
     checkpoint = ModelCheckpoint(save_path,
