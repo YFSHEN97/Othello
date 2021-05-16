@@ -9,8 +9,9 @@ import data_helper as DataHelper
 
 
 class DataGenerator(keras.utils.Sequence):
-    def __init__(self, list_IDs, labels, batch_size=30, dim=(8,8), n_channels=2,
+    def __init__(self, data_source, list_IDs, labels, batch_size=30, dim=(8,8), n_channels=2,
                  n_classes=60, shuffle=True):
+        self.data_source = data_source
         self.dim = dim
         self.batch_size = batch_size
         self.labels = labels
@@ -45,7 +46,7 @@ class DataGenerator(keras.utils.Sequence):
         X = np.empty((self.batch_size, *self.dim, self.n_channels))
         y = np.empty((self.batch_size), dtype=int)
         # pull data entries from the right places
-        with open("data.undup", "rb") as f:
+        with open(self.data_source, "rb") as f:
             for i, ID in enumerate(list_IDs_temp):
                 X[i,] = DataHelper.seek_datum(f, ID)
                 y[i] = self.labels[ID]

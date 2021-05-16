@@ -72,20 +72,21 @@ def buildClassifier():
     classifier.add( Dense( units=60,  activation='softmax', kernel_regularizer=l2(5e-4), name='fc60'))
 
     # Compile the CNN
-    sgd = SGD(lr=0.1, momentum=0.95)
+    sgd = SGD(lr=0.05, momentum=0.95)
     classifier.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
     
     return classifier
 
 
-def trainModel( model, batch_size=100, num_epochs=24 ):
+def trainModel( model, small=True, batch_size=100, num_epochs=24 ):
 
     # create callbacks
     def lr_scheduler(epoch, lr):
-        decay_rate = 0.95
+        decay_rate = 0.95 if small else 0.8
         return lr * pow(decay_rate, epoch)
     scheduler = LearningRateScheduler(lr_scheduler, verbose=1)
-    checkpoint = ModelCheckpoint("best.h5",
+    save_path = "best_small.h5" if small else "best_symmetric.h5"
+    checkpoint = ModelCheckpoint(save_path,
                         monitor='val_accuracy',
                         verbose=1,
                         save_best_only=True,
@@ -94,25 +95,34 @@ def trainModel( model, batch_size=100, num_epochs=24 ):
     callbacks = [scheduler, checkpoint]
 
     # prepare all the training data and labels
-    total = 5377484
-    train = 4000000
-    data_labels_path = "data.undup.labels"
+    if small:
+        total = 5377484
+        train = 4000000
+        data_path = "data.undup"
+        data_labels_path = "data.undup.labels"
+    else:
+        total = 42991908
+        train = 40000000
+        data_path = "data_symmetric.undup"
+        data_labels_path = "data_symmetric.undup.labels"
+
     partition = {
         "train": list(range(train)),
         "validation": list(range(train, total))
     }
     with open(data_labels_path, "rb") as handle:
         labels = pickle.load(handle)
-    training_generator = DataGenerator(partition["train"], labels, batch_size=batch_size)
-    validation_generator = DataGenerator(partition["validation"], labels, batch_size=batch_size)
+    training_generator = DataGenerator(data_path, partition["train"], labels, batch_size=batch_size)
+    validation_generator = DataGenerator(data_path, partition["validation"], labels, batch_size=batch_size)
 
     # train the model
-    model.fit(training_generator,
-                epochs=num_epochs,
-                validation_data=validation_generator,
-                callbacks=callbacks,
-                workers=10,
-                use_multiprocessing=True)
+    model.fit_generator(generator=training_generator,
+                        epochs=num_epochs,
+                        steps_per_epoch=train//batch_size,
+                        validation_data=validation_generator,
+                        validation_steps=(total-train)//batch_size,
+                        callbacks=callbacks,
+                        workers=40)
     
     return model
 
@@ -120,7 +130,18 @@ def trainModel( model, batch_size=100, num_epochs=24 ):
 if __name__ == '__main__':
     
     model = buildClassifier()
-    model = trainModel(model)
-    model.save("trained_othello")
 
-    
+    if len(sys.argv) == 1:
+        print("Please specify which dataset to use ('small' or 'symmetric')")
+        sys.exit()
+
+    if sys.argv[1] == "--small":
+        model = trainModel(model)
+        model.save("trained_small_" + str(datetime.datetime.now()))
+    elif sys.argv[1] == "--symmetric":
+        model = trainModel(model, small=False, batch_size=1000, num_epochs=6)
+        model.save("trained_symmetric_" + str(datetime.datetime.now()))
+    else:
+        print("Error: unknown dataset argument '{}'".format(sys.argv[1]))
+
+       
