@@ -1,3 +1,4 @@
+# DEPRECATED: this script is no longer used!!
 # this script is specifically designed to work with the CNNComputerAgent
 
 import keras

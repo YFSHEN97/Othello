@@ -15,6 +15,3 @@ Edax/
 move_predictor/data/
 move_predictor/data.*
 move_predictor/data_symmetric.*
-move_predictor/best_*
-move_predictor/trained_*
-

@@ -8,6 +8,7 @@ SOURCES    = othello.cpp position.cpp bitboard.cpp agent.cpp mcts.cpp cnn.cpp
 OBJECTS    = $(SOURCES:.cpp=.o)
 
 
+# make -j is all you need to compile the main program "othello"
 all: $(SOURCES) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS) 
