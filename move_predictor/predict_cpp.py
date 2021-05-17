@@ -24,8 +24,8 @@ if __name__ == "__main__":
     # load models
     # because this script is invoked by system(python3 ...) in C++ in ../
     # we need to specify move_predictor/... prefix in path
-    model = keras.models.load_model("move_predictor/trained_small_2021-05-16")
-    model.load_weights("move_predictor/best_small.h5")
+    model = keras.models.load_model("move_predictor/trained_symmetric_2021-05-16")
+    model.load_weights("move_predictor/best_symmetric.h5")
 
     # bb.temp contains two lines
     # first line is blackBB in decimal digits

@@ -100,13 +100,13 @@ def trainModel( model, small=True, batch_size=100, num_epochs=24 ):
     if small:
         total = 5377484
         train = 4000000
-        data_path = "data.undup"
-        data_labels_path = "data.undup.labels"
+        data_path = "data/data.undup"
+        data_labels_path = "data/data.undup.labels"
     else:
         total = 42991908
         train = 40000000
-        data_path = "data_symmetric.undup"
-        data_labels_path = "data_symmetric.undup.labels"
+        data_path = "data/data_symmetric.undup"
+        data_labels_path = "data/data_symmetric.undup.labels"
 
     partition = {
         "train": list(range(train)),

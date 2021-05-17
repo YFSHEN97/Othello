@@ -6,11 +6,9 @@
 #include "agent.h"
 #include "position.h"
 #include "MERSENNE_TWISTER.h"
+MERSENNE_TWISTER twister_2(time(NULL));
 
 using namespace std;
-
-
-MERSENNE_TWISTER twister_2(time(NULL));
 
 
 // TreeNode is used to expand MC tree structure
@@ -33,8 +31,8 @@ static void dumpTree(TreeNode *root)
 
 
 // constructor
-MCTSComputerAgent::MCTSComputerAgent(Color c, uint32_t iterations, bool bias) :
-    Agent(c), iterations(iterations), bias(bias)
+MCTSComputerAgent::MCTSComputerAgent(Color c, uint32_t iterations, Rollout f) :
+    Agent(c), iterations(iterations), rollout(f)
 {
     tree = NULL;
 }
@@ -196,35 +194,4 @@ void MCTSComputerAgent::MCTS(TreeNode *node, Position& pos)
     }
 
     return;
-}
-
-
-// do a rollout according to default policy, and return game outcome
-// DEFAULT POLICY:
-// if corner moves are available, then make one of the corner moves
-// otherwise if there are moves other than b2, b7, g2, g7 available, choose one of those
-// otherwise choose one of b2, b7, g2, g7
-int MCTSComputerAgent::rollout(Position& pos)
-{
-    while (!pos.game_over()) {
-        Bitboard moves_bb = pos.generate_moves((Color)pos.whose_turn());
-        if (!moves_bb) {
-            pos.pass((Color)pos.whose_turn());
-            continue;
-        }
-        Bitboard pool = moves_bb;
-        if (bias) {
-            // first prioritize corner squares
-            pool &= 0x8100000000000081;
-            if (pool == 0) pool = moves_bb;
-            // next eliminate b2, b7, g2, g7, if possible
-            pool &= 0xffbdffffffffbdff;
-            if (pool == 0) pool = moves_bb;
-        }
-        // for performance reasons, we don't use Position.bb2vec to pick a random move
-        int r = 1 + twister_2.randInt(popcount(pool) - 1);
-        int m = 64 - rth_setbit_position(pool, r);
-        pos.make_move(m, (Color)pos.whose_turn());
-    }
-    return pos.outcome();
 }

@@ -13,13 +13,13 @@ def evaluateModel(model, small=True, batch_size=100):
     if small:
         total = 5377484
         train = 4000000
-        data_path = "data.undup"
-        data_labels_path = "data.undup.labels"
+        data_path = "data/data.undup"
+        data_labels_path = "data/data.undup.labels"
     else:
         total = 42991908
         train = 40000000
-        data_path = "data_symmetric.undup"
-        data_labels_path = "data_symmetric.undup.labels"
+        data_path = "data/data_symmetric.undup"
+        data_labels_path = "data/data_symmetric.undup.labels"
     evaluation = list(range(train, total))
     with open(data_labels_path, "rb") as handle:
         labels = pickle.load(handle)
@@ -29,6 +29,10 @@ def evaluateModel(model, small=True, batch_size=100):
 
 
 if __name__ == "__main__":
-    model = keras.models.load_model("trained_small_2021-05-16 10:49:24.428328")
-    model.load_weights("best_small.h5")
-    evaluateModel(model)
+    # model = keras.models.load_model("trained_small_2021-05-16")
+    # model.load_weights("best_small.h5")
+    # evaluateModel(model)
+
+    model = keras.models.load_model("trained_symmetric_2021-05-16")
+    model.load_weights("best_symmetric.h5")
+    evaluateModel(model, small=False, batch_size=1000)

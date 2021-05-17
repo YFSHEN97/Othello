@@ -4,12 +4,12 @@
 #include <string>
 #include <stdlib.h>
 #include "agent.h"
+
 #include "MERSENNE_TWISTER.h"
+MERSENNE_TWISTER twister(time(NULL));
+
 
 using namespace std;
-
-
-MERSENNE_TWISTER twister(time(NULL));
 
 
 // constructor
@@ -58,35 +58,4 @@ int HumanAgent::policy(Position& pos)
         }
         return move;
     }
-}
-
-
-int CNNComputerAgent::policy(Position& pos)
-{
-    // check if there is any legal move
-    Bitboard all_moves = pos.generate_moves(side);
-    if (!all_moves) return -1;
-
-    // write board information to file
-    Bitboard black_out = (side == BLACK) ? (pos.get_blackBB()) : (pos.get_whiteBB());
-    Bitboard white_out = (side == BLACK) ? (pos.get_whiteBB()) : (pos.get_blackBB());
-    ofstream bb;
-    bb.open("bb.temp");
-    bb << to_string(black_out) << endl;
-    bb << to_string(white_out) << endl;
-    bb << to_string(all_moves) << endl;
-    bb.close();
-
-    // invoke Keras python script
-    system("python3 move_predictor/predict_cpp.py > move.temp");
-
-    // read result
-    ifstream mm("move.temp");
-    string line;
-    getline(mm, line);
-    int move = stoi(line);
-
-    // clean up
-    system("rm -f bb.temp move.temp");
-    return move;
 }

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     model = keras.models.load_model("trained_small_2021-05-16")
     model.load_weights("best_small.h5")
 
-    with open("data.txt", "rb") as file:
+    with open("data/data.txt", "rb") as file:
         board = DataHelper.seek_datum(file, 100)
     
     move = predict_move(model, board)

@@ -2,6 +2,7 @@
 #define AGENT_H
 
 #include <cstdint>
+#include <fdeep/fdeep.hpp>
 #include "bitboard.h"
 #include "position.h"
 
@@ -46,13 +47,16 @@ private:
 
 // used to support MC tree structure
 struct TreeNode;
+// wrapper for a rollout policy function; type of function is "Rollout"
+typedef int (*Rollout)(Position& pos);
 
 
 // a computer AI that uses Monte Carlo Tree Search for policy
 class MCTSComputerAgent : public Agent {
 public:
     // constructor
-    MCTSComputerAgent(Color c, uint32_t iterations, bool bias);
+    // user must specify a function for the Rollout policy!
+    MCTSComputerAgent(Color c, uint32_t iterations, Rollout f);
     // destructor
     ~MCTSComputerAgent();
     // after a move has been made, preserve relevant search tree branches
@@ -62,22 +66,26 @@ private:
     uint32_t iterations;
     // store the search tree from previous MCTS iterations
     TreeNode *tree;
-    // bias indicates whether the default policy should use bias
-    bool bias;
     // policy function that returns the best move given a position
     int policy(Position& pos);
     // do one iteration of MCTS and update stats in place
     void MCTS(TreeNode *node, Position& pos);
     // do a rollout according to a particular default policy, and return game outcome
-    int rollout(Position& pos);
+    Rollout rollout;
 };
 
 
 // a computer AI that uses an externally trained CNN to predict best moves
 class CNNComputerAgent : public Agent {
 public:
-    using Agent::Agent;
+    // constructor
+    CNNComputerAgent(Color c, fdeep::model& model);
+    // destructor
+    ~CNNComputerAgent() {};
 private:
+    // the externally trained CNN model
+    fdeep::model model;
+    // policy function that returns the best move given a position
     int policy(Position& pos);
 };
 

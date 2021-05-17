@@ -10,6 +10,9 @@ parser
 mcts_v_edax
 
 Edax/
+
+# ignore training data and trained models
+move_predictor/data/
 move_predictor/data.*
 move_predictor/data_symmetric.*
 move_predictor/best_*

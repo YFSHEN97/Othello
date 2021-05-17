@@ -1,10 +1,10 @@
 # calls:
 CC         = clang++
-CFLAGS     = -c -Wall -Wno-deprecated-register -std=c++11 -O3
+CFLAGS     = -c -Wall -Wno-deprecated-register -std=c++14 -O3 -march=native
 LDFLAGS    = 
 EXECUTABLE = othello
 
-SOURCES    = othello.cpp position.cpp bitboard.cpp agent.cpp mcts.cpp
+SOURCES    = othello.cpp position.cpp bitboard.cpp agent.cpp mcts.cpp cnn.cpp
 OBJECTS    = $(SOURCES:.cpp=.o)
 
 
