@@ -84,16 +84,25 @@ int RolloutCNN(Position& pos)
                 T.set(fdeep::tensor_pos(7-i, j, 1), (white_out >> index) & 0x1);
             }
         }
-        int move = Model.predict_class({T}); // returns index of neuron with max activation
+        auto result = Model.predict({T}); // returns vector of fdeep::internal::tensor
+        auto outvec = result[0].to_vector();
 
-        // convert the move to board squares (0-63 range)
+        // cull the output vector by the legal moves
+        for (int i = 0; i < 27; i++) outvec[i] *= ((moves_bb >> i) & 0x1);
+        for (int i = 27; i < 33; i++) outvec[i] *= ((moves_bb >> (i + 2)) & 0x1);
+        for (int i = 33; i < 60; i++) outvec[i] *= ((moves_bb >> (i + 4)) & 0x1);
+
+        // output best move by finding index for argmax and remapping to board
+        float max = -1;
+        int move = -1;
+        for (int i = 0; i < outvec.size(); i++) {
+            if (outvec[i] > max) {
+                max = outvec[i];
+                move = i;
+            }
+        }
         if (move >= 33) move += 4;
         else if (move < 33 && move >= 27) move += 2;
-
-        // choose randomly if the predicted move is illegal
-        if (((1ULL << move) & moves_bb) == 0) {
-            move = 64 - rth_setbit_position(moves_bb, 1 + twister_3.randInt(popcount(moves_bb) - 1));
-        }
 
         pos.make_move(move, (Color)pos.whose_turn());
     }
